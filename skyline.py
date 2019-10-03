@@ -3,7 +3,7 @@ import sys
 import pandas as pd
 
 MIN_SUPPORT = .1
-MIN_CONF = .6
+MIN_CONF = .8
 goods = [0]*50
 max_rows = 0
 candidates = [{}, {}]
@@ -15,11 +15,16 @@ def main():
    #  print(sys.argv[1])
    im = Importer()
    example1 = im.import_sparse("data/example/out1.csv")
-   apriori(example1, goods, MIN_SUPPORT)
-   skylines = confidence(example1)
-   print(skylines)
+   support(example1, goods, MIN_SUPPORT)
+   all_rules = confidence(example1)
+   skylines = weed_out(all_rules)
+   parse_output(skylines)
 
-def apriori(data, goods, minSup):
+# ----------------------------------------------------
+# CALCULATE SUPPORT
+# ----------------------------------------------------
+
+def support(data, goods, minSup):
 	#support_1(data)
 	global max_rows
 	global frequent
@@ -81,77 +86,6 @@ def apriori(data, goods, minSup):
 
 		k+=1
 
-#        for t in T:
-#             for c in C[k]:
-#                 if(c in t):
-#                     count[c] += 1
-
-#         F[k] = those in C[k] if support > min support
-#         k = k+1
-
-def confidence(data):
-   global frequent
-   skylines = []
-   
-   for index in reversed(range(len(frequent))):
-      itemset = frequent[index]
-      for items in itemset:
-         items = list(items)
-         for v in items:
-            if len(items) <= 1:
-               break
-            temp = remove_val(items, v)
-            print(temp)
-            print(v)
-            conf = calc_conf(data, temp, v)
-            if conf > MIN_CONF:
-               skylines.append([temp, v, conf])
-   
-   return skylines
-
-def remove_val(items, v):
-   temp = []
-
-   for i in items:
-      if i != v:
-         temp.append(i)
-   
-   return temp
-
-def calc_conf(data, itemset, v):
-   num_items = 0
-   num_matches = 0
-   
-   print("Evaluating set {} with item {}".format(itemset, v))
-   for row in data.iterrows():
-      row = row[1]
-      found = [False]*len(itemset)
-      has_v = False
-      i = 1
-      while i < len(row):
-         j = 0
-         while j < len(itemset):
-            if itemset[j] == row[i]:
-               found[j] = True
-            elif v == row[i]:
-               has_v = True
-            j += 1
-         if checkFound(found):
-            num_items += 1
-            num_matches += has_v
-         i += 1 
-   
-   print("Found {}/{}".format(num_matches, num_items))
-   if num_items == 0:
-      return 0.0
-   return float(num_matches)/float(num_items)
-
-def checkFound(list):
-   for l in list:
-      if l == False:
-         return False
-   return True
-
 def getCount(row):
 	i = 1
 	while i < len(row):
@@ -178,7 +112,113 @@ def candidateGen(n):
 			#print(i, j, newset)
 			if (len(newset) == n) and (newset not in candidates[n]):
 				candidates[n][newset] = 0  #candidates[n][{ + [[temp[i], temp[j]]]
-					 
+
+# ----------------------------------------------------
+# CALCULATE CONFIDENCE
+# ----------------------------------------------------
+
+def confidence(data):
+   global frequent
+   rules = []
+   
+   for index in reversed(range(len(frequent))):
+      itemset = frequent[index]
+      for items in itemset:
+         items = list(items)
+         for v in items:
+            if len(items) <= 1:
+               break
+            temp = remove_val(items, v)
+            conf = calc_conf(data, temp, v)
+            if conf > MIN_CONF:
+               rules.append([items, temp, v, conf])
+   
+   return rules
+
+def remove_val(items, v):
+   temp = []
+
+   for i in items:
+      if i != v:
+         temp.append(i)
+   
+   return temp
+
+def calc_conf(data, itemset, v):
+   num_items = 0
+   num_matches = 0
+   
+   # print("Evaluating set {} with item {}".format(itemset, v))
+   for row in data.iterrows():
+      row = row[1]
+      found = [False]*len(itemset)
+      has_v = False
+      i = 1
+      while i < len(row):
+         j = 0
+         while j < len(itemset):
+            if itemset[j] == row[i]:
+               found[j] = True
+            elif v == row[i]:
+               has_v = True
+            j += 1
+         if checkFound(found):
+            num_items += 1
+            num_matches += has_v
+         i += 1 
+   
+   # print("Found {}/{}".format(num_matches, num_items))
+   if num_items == 0:
+      return 0.0
+   return float(num_matches)/float(num_items)
+
+def checkFound(list):
+   for l in list:
+      if l == False:
+         return False
+   return True
+
+# ----------------------------------------------------
+# PARSING FUNCTIONS
+# ----------------------------------------------------
+
+def weed_out(rules):
+   vals = [0]*50
+   for r in rules:
+      rule = r[0]
+      for v in rule:
+         indices = []
+         removed = False
+         if vals[v] != 0:
+            rules.remove(r)
+            removed = True
+            break
+         else:
+            indices.append(v)
+      if not removed:
+         for i in indices:
+            vals[i] += 1
+   
+   return rules
+         
+         
+
+# skylines is a list of [set, a, b, confidence]
+# given a -> b	and set = a + b
+def parse_output(skylines):
+   print("Minimum Support: {}".format(MIN_SUPPORT))
+   print("Minimum Confidence: {}".format(MIN_CONF))
+   print("")
+   for rule in skylines:
+      subset = rule[0]
+      a = rule[1]
+      b = rule[2]
+      conf = rule[3]*100
+
+      print("Given set {}".format(subset))
+      print("{} -> {} = {}% Confident".format(a, b, conf))
+      print("")
+
 
 class mySets:
 	def __init__(self, subset, count):
