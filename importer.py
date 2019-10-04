@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 # ALL SPARSE FILES
 SPARSE_FILES = ['data/apriori/1000/1000-out1.csv', 'data/apriori/5000/5000-out1.csv', 'data/apriori/20000/20000-out1.csv',
@@ -15,6 +16,10 @@ class Importer:
    
    def import_csv(self, inf):
       df = pd.read_csv(inf)
+      return df
+
+   def import_psv(self, inf):
+      df = pd.read_csv(inf, sep="\ \|\ ", header=None, names={'Id', 'Name'})#, dtype = {'id':np.int32, 'name':str})
       return df
    
    def import_list(self, files, file_type="sparse"):
