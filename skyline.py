@@ -2,13 +2,13 @@ from importer import Importer
 import sys
 import pandas as pd
 import warnings
+# import matplotlib.pyplot as mpl
 
 
 #warnings.filterwarnings("ignore")
 
-MIN_SUPPORT = .05
-MIN_CONF = .05
-
+MIN_SUPPORT = .1
+MIN_CONF = .5
 #max_rows = 0
 #candidates = [{}, {}]
 #frequent = [{}, {}]
@@ -60,6 +60,7 @@ def main():
 # ----------------------------------------------------
 # CALCULATE SUPPORT
 # ----------------------------------------------------
+f = open("support.txt", "w")
 
 def apriori(data, minSup):
 	#support_1(data)
@@ -78,17 +79,13 @@ def apriori(data, minSup):
 		candidates = getCount(row, candidates)
 		max_rows += 1
 
-
-
 	for cand in candidates[1]:
 		#print(i, goods[i], max_rows)
 		val = candidates[1][cand]
-		# print(val, max_rows, val/max_rows)
+		# f.write("{}\n".format(float(val)/float(max_rows)))
 		if float(val)/float(max_rows) >= MIN_SUPPORT:
 			frequent[1][cand] = val
 		#candidates[1][frozenset([i])] = goods[i]
-	
-
 
 	#def support2(data, X, Y):
 	#F[0] = support(T, I, minSup)
@@ -113,7 +110,8 @@ def apriori(data, minSup):
 		for cand in candidates[k]:
 			count = float(candidates[k][cand])
 			#print("\n\ncand: ", cand, "\nsupport: ", (count/float(max_rows)))
-			if count / float(max_rows) > MIN_SUPPORT:
+			# f.write("{}\n".format(float(count) / float(max_rows)))
+			if float(count) / float(max_rows) > MIN_SUPPORT:
 				print(count / float(max_rows))
 				# print(count/float(max_rows))
 				frequent[k][cand] = count
@@ -306,7 +304,8 @@ def parse_author_labels(data):
 	labels = {}
 	for i, row in data.iterrows():
 		#print(row)
-		labels[row["Id"]] = row['Name']# + " " + row['Food'][1:-1]
+		print(row["Id"], row["Name"])
+		labels[row["Name"]] = row['Id']# + " " + row['Food'][1:-1]
 
 	return labels
 
