@@ -5,7 +5,7 @@ import warnings
 
 #warnings.filterwarnings("ignore")
 
-MIN_SUPPORT = .01
+MIN_SUPPORT = .05
 MIN_CONF = .1
 #max_rows = 0
 #candidates = [{}, {}]
