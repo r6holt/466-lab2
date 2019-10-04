@@ -6,7 +6,7 @@ import warnings
 #warnings.filterwarnings("ignore")
 
 MIN_SUPPORT = .01
-MIN_CONF = .1
+MIN_CONF = .6
 #max_rows = 0
 #candidates = [{}, {}]
 #frequent = [{}, {}]
@@ -153,52 +153,6 @@ def candidateGen(n, candidates, frequent):
 # ----------------------------------------------------
 # CALCULATE CONFIDENCE
 # ----------------------------------------------------
-'''
-def confidence(data):
-	global frequent
-	rules = []
-	
-	for index in reversed(range(len(frequent))):
-		itemset = frequent[index]
-		for items in itemset:
-		 items = list(items)
-		 for v in items:
-			if len(items) <= 1:
-				break
-			temp = remove_val(items, v)
-			conf = calc_conf(data, temp, v)
-			if conf > MIN_CONF:
-				rules.append([items, temp, v, conf])
-	
-	return rules
-'''
-'''
-Algorithm genRules(F, minConf) // F - frequent itemsets
-	begin
-	foreach f ∈ F s.t. |f| = k ≥ 2 do
-		H1 = ∅;
-		foreach s ∈ f do
-		if confidenceT (f − {s} −→ {s}) ≥ minConf then
-			H1 := H1 ∪ {f − {s} −→ {s}};
-		endfor
-		apGenRules(f,H1);
-'''
-"""
-apGenRules
-if (k > m + 1) AND H 6= ∅ then
-	Hm+1 := candidateGen(Hm, m);
-	foreach h ∈ Hm+1 do
-		conf idence
-		if conf idence ≥ minConf then
-			output (f − h) −→ h; //new rule found
-		else
-			Hm+1 := Hm+1 − {h}
-	endfor
-
-"""
-
-
-
 
 def genRules(data, minConf, frequent):
 	rules = {}

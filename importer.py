@@ -10,7 +10,7 @@ SPARSE_FILES = ['data/apriori/1000/1000-out1.csv', 'data/apriori/5000/5000-out1.
 class Importer:
    def import_sparse(self, inf):
       chunksize = 10       # perhaps try some different values here?
-      chunks = pd.read_csv( inf, chunksize=chunksize, dtype={'txt':'category'} )
+      chunks = pd.read_csv( inf, chunksize=chunksize )
       df = pd.concat( chunk.to_sparse(fill_value=0.0) for chunk in chunks )
       return df
    
