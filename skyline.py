@@ -3,10 +3,11 @@ import sys
 import pandas as pd
 import warnings
 
+
 #warnings.filterwarnings("ignore")
 
 MIN_SUPPORT = .05
-MIN_CONF = .1
+MIN_CONF = .05
 
 #max_rows = 0
 #candidates = [{}, {}]
@@ -48,7 +49,9 @@ def main():
 	frequent = apriori(data, minSup)
 	rules = genRules(data, minConf, frequent)
 	#parse_output(rules, labels)
-	parse_output(rules, labels)
+
+	print_frequent(frequent, labels)
+	print_rules(rules, labels)
 
 	#all_rules = confidence(example1)
 	#skylines = weed_out(all_rules)
@@ -111,6 +114,7 @@ def apriori(data, minSup):
 			count = float(candidates[k][cand])
 			#print("\n\ncand: ", cand, "\nsupport: ", (count/float(max_rows)))
 			if count / float(max_rows) > MIN_SUPPORT:
+				print(count / float(max_rows))
 				# print(count/float(max_rows))
 				frequent[k][cand] = count
 				
@@ -308,7 +312,7 @@ def parse_author_labels(data):
 
 # skylines is a list of [set, a, b, confidence]
 # given a -> b	and set = a + b
-def parse_output(rules, labels):
+def print_rules(rules, labels):
 	print("Minimum Support: {}".format(MIN_SUPPORT))
 	print("Minimum Confidence: {}".format(MIN_CONF))
 	print("")
@@ -336,7 +340,11 @@ def parse_output(rules, labels):
 			print("{} ---> {} \t\t[sup={} conf={}]".format(a_string, b_string, sup, conf))
 			#print("")
 
-def parse_output2(rules, labels):
+def print_frequent(frequent, labels):
+	for entry in frequent:
+		print(entry)
+
+def print_rules2(rules, labels):
 	print("Minimum Support: {}".format(MIN_SUPPORT))
 	print("Minimum Confidence: {}".format(MIN_CONF))
 	print("")
