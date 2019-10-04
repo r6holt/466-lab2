@@ -6,7 +6,7 @@ import warnings
 
 #warnings.filterwarnings("ignore")
 
-MIN_SUPPORT = .05
+MIN_SUPPORT = .07
 MIN_CONF = .05
 
 #max_rows = 0
@@ -340,9 +340,40 @@ def print_rules(rules, labels):
 			print("{} ---> {} \t\t[sup={} conf={}]".format(a_string, b_string, sup, conf))
 			#print("")
 
+def freq_to_sky(frequent):
+	not_sky = False
+	subset_keys = []
+	for key in iter(frequent):
+		if(items > key and key not in subset_keys):
+			subset_keys += [key]
+
+		elif(items < key):
+			not_sky = True
+
+		else:
+			pass
+
+	if not not_sky:
+
+		#print("a: ", a, "b: ", b)
+		if items in rules:
+			#print("adding to key:", items)
+			rules[items] += [[a, b, conf, sup]]
+
+		else:
+			#print("new key: ", items)
+			rules[items] = [[a, b, conf, sup]]
+
+	for key in subset_keys:
+		del rules[key]
+
+
+
 def print_frequent(frequent, labels):
 	for entry in frequent:
-		print(entry)
+		for key in entry:
+			print(list(key))
+
 
 def print_rules2(rules, labels):
 	print("Minimum Support: {}".format(MIN_SUPPORT))
