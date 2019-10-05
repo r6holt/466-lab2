@@ -7,8 +7,8 @@ import warnings
 
 #warnings.filterwarnings("ignore")
 
-MIN_SUPPORT = .1
-MIN_CONF = .5
+MIN_SUPPORT = 0.02
+MIN_CONF = .9
 #max_rows = 0
 #candidates = [{}, {}]
 #frequent = [{}, {}]
@@ -47,6 +47,7 @@ def main():
 		labels = parse_good_labels(raw_labels)
 
 	frequent = apriori(data, minSup)
+	# print("# of frequent sets: {}".format(len(frequent)))
 	rules = genRules(data, minConf, frequent)
 	#parse_output(rules, labels)
 
@@ -64,6 +65,7 @@ f = open("support.txt", "w")
 
 def apriori(data, minSup):
 	#support_1(data)
+	num_freq = 0
 	max_rows = 0
 	candidates = [{}, {}]
 	frequent = [{}, {}]
@@ -110,9 +112,10 @@ def apriori(data, minSup):
 		for cand in candidates[k]:
 			count = float(candidates[k][cand])
 			#print("\n\ncand: ", cand, "\nsupport: ", (count/float(max_rows)))
-			# f.write("{}\n".format(float(count) / float(max_rows)))
+			f.write("{}\n".format(float(count) / float(max_rows)))
 			if float(count) / float(max_rows) > MIN_SUPPORT:
-				print(count / float(max_rows))
+				num_freq += 1
+				# print(count / float(max_rows))
 				# print(count/float(max_rows))
 				frequent[k][cand] = count
 				
@@ -120,6 +123,7 @@ def apriori(data, minSup):
 			break
 
 		k+=1
+	print("# of Frequent sets: {}".format(num_freq))
 	return frequent
 
 def getCount(row, candidates):
@@ -161,7 +165,7 @@ def genRules(data, minConf, frequent):
 	rules = {}
 
 	for group in frequent:
-		#print("Group: ", group)
+		print("Group: ", group)
 		for items in group:
 			if len(items) <= 1:
 				break
@@ -219,7 +223,7 @@ def confidence(data, itemset, v):
 		return 0.0
 
 	conf = float(num_matches)/float(num_items)
-	sup = num_matches/row_count
+	sup = float(num_matches)/float(row_count)
 
 	return (conf, sup)
 
@@ -304,7 +308,7 @@ def parse_author_labels(data):
 	labels = {}
 	for i, row in data.iterrows():
 		#print(row)
-		print(row["Id"], row["Name"])
+		# print(row["Id"], row["Name"])
 		labels[row["Name"]] = row['Id']# + " " + row['Food'][1:-1]
 
 	return labels
@@ -315,6 +319,7 @@ def print_rules(rules, labels):
 	print("Minimum Support: {}".format(MIN_SUPPORT))
 	print("Minimum Confidence: {}".format(MIN_CONF))
 	print("")
+	f = open("confidence.txt", "w")
 	for key in rules:
 		#print("rules: ", rules[key])
 		for rule in rules[key]:
@@ -328,7 +333,7 @@ def print_rules(rules, labels):
 			count = 0
 			for entry in list(a):
 				if(count>0):
-					a_string += " and "
+					a_string += " | "
 				a_string += labels[entry]
 				count+=1
 
@@ -336,6 +341,7 @@ def print_rules(rules, labels):
 				b_string += labels[entry]
 
 			#print("Given set {}".format(key))
+			f.write("{}\n".format(conf))
 			print("{} ---> {} \t\t[sup={} conf={}]".format(a_string, b_string, sup, conf))
 			#print("")
 
