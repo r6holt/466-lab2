@@ -7,8 +7,8 @@ import warnings
 
 #warnings.filterwarnings("ignore")
 
-MIN_SUPPORT = 0.02
-MIN_CONF = .9
+MIN_SUPPORT = 0.08
+MIN_CONF = .60
 #max_rows = 0
 #candidates = [{}, {}]
 #frequent = [{}, {}]
@@ -51,7 +51,7 @@ def main():
 	rules = genRules(data, minConf, frequent)
 	#parse_output(rules, labels)
 
-	print_frequent(frequent, labels)
+	print_sky_freq(freq_to_sky(frequent), rules,  labels)
 	print_rules(rules, labels)
 
 	#all_rules = confidence(example1)
@@ -165,7 +165,7 @@ def genRules(data, minConf, frequent):
 	rules = {}
 
 	for group in frequent:
-		print("Group: ", group)
+		#print("Group: ", group)
 		for items in group:
 			if len(items) <= 1:
 				break
@@ -346,39 +346,59 @@ def print_rules(rules, labels):
 			#print("")
 
 def freq_to_sky(frequent):
-	not_sky = False
-	subset_keys = []
-	for key in iter(frequent):
-		if(items > key and key not in subset_keys):
-			subset_keys += [key]
+	sky = []
+	for group in frequent:
+		#print("Group: ", group)
+		for items in group:
+			not_sky = False
+			subset_keys = []
+			for dicts in iter(frequent):
+				for key in iter(dicts):
+					if(items > key and key not in subset_keys):
+						subset_keys += [key]
 
-		elif(items < key):
-			not_sky = True
+					elif(items < key):
+						not_sky = True
+
+					else:
+						pass
+
+				if not not_sky:
+					#print("a: ", a, "b: ", b)
+					if items in sky:
+						#print("adding to key:", items)
+						pass
+
+					else:
+						#print("new key: ", items)
+						sky += [items]
+
+				print(sky)
+				for key in subset_keys: 
+					if key in sky:
+						sky.remove(key)
+	return sky
+
+
+def print_sky_freq(sky_freq, rules, labels):
+	setNum = 1
+	for entry in sky_freq:
+		entry_string = ""
+		count = 0
+		for item in list(entry):
+				if(count>0):
+					entry_string += ". "
+				entry_string += labels[item]
+				count+=1
+		"""if entry in rules.keys():
+			sup = rules[entry][0][3] * 100
 
 		else:
-			pass
+			sup = 0.00"""
+		#print("Skyline Frequent Set #{}: ".format(setNum), "{", entry_string, "}", "\t\t [sup: {}]".format(sup) )
+		print("Skyline Frequent Set #{}: ".format(setNum), "{", entry_string, "}")
 
-	if not not_sky:
-
-		#print("a: ", a, "b: ", b)
-		if items in rules:
-			#print("adding to key:", items)
-			rules[items] += [[a, b, conf, sup]]
-
-		else:
-			#print("new key: ", items)
-			rules[items] = [[a, b, conf, sup]]
-
-	for key in subset_keys:
-		del rules[key]
-
-
-
-def print_frequent(frequent, labels):
-	for entry in frequent:
-		for key in entry:
-			print(list(key))
-
+		setNum+=1
 
 def print_rules2(rules, labels):
 	print("Minimum Support: {}".format(MIN_SUPPORT))
